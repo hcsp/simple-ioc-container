@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyIoCContainer {
-    private HashMap<String, Object> hashMap;
+    private HashMap<String, Object> beans;
 
     // 实现一个简单的IoC容器，使得：
     // 1. 从beans.properties里加载bean定义
@@ -20,7 +20,6 @@ public class MyIoCContainer {
         MyIoCContainer container = new MyIoCContainer();
         container.start();
         OrderService orderService = (OrderService) container.getBean("orderService");
-        System.out.println(orderService);
         orderService.createOrder();
     }
 
@@ -34,7 +33,7 @@ public class MyIoCContainer {
         try {
             properties.load(MyIoCContainer.class.getResourceAsStream("/beans.properties"));
         } catch (IOException e) {
-            throw new RuntimeException("properties路径有误");
+            throw new RuntimeException("properties路径有误", e);
         }
         return properties;
     }
@@ -72,29 +71,29 @@ public class MyIoCContainer {
         List<Field> fields = Stream.of(beanInstance.getClass().getDeclaredFields())
                 .filter(field -> field.getAnnotation(Autowired.class) != null)
                 .collect(Collectors.toList());
-            fields.forEach(field -> {
-                String filedName = field.getName();
-                Object filedInstance = beans.get(filedName);
-                field.setAccessible(true);
-                try {
-                    field.set(beanInstance, filedInstance);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        fields.forEach(field -> {
+            String filedName = field.getName();
+            Object filedInstance = beans.get(filedName);
+            field.setAccessible(true);
+            try {
+                field.set(beanInstance, filedInstance);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     // 启动该容器
     public void start() {
         Properties properties = getAndLoadProperties();
-        hashMap = newInstance(properties);
-        hashMap.forEach((name, instance) -> {
-            dependencyInstance(name, instance, hashMap);
+        beans = newInstance(properties);
+        beans.forEach((name, instance) -> {
+            dependencyInstance(name, instance, beans);
         });
     }
 
     // 从容器中获取一个bean
     public Object getBean(String beanName) {
-        return hashMap.get(beanName);
+        return beans.get(beanName);
     }
 }
