@@ -53,7 +53,7 @@ public class MyIoCContainer {
                 Object newBeanInstance = klass.getConstructor().newInstance();
                 hashMap.put((String) beanName, newBeanInstance);
             } catch (Exception e) {
-                throw new RuntimeException();
+                throw new RuntimeException(e);
             }
         });
         return hashMap;
