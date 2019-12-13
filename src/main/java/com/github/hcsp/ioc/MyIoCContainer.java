@@ -32,7 +32,6 @@ public class MyIoCContainer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         properties.forEach((beanName, beanClass) -> {
             try {
                 Class<?> klass = Class.forName((String) beanClass);
