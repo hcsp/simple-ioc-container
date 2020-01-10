@@ -48,29 +48,32 @@ public class MyIoCContainer {
 
     private Object injectionAccountValue(String className) throws IllegalAccessException, InstantiationException {
         Class kCla = null;
+        Object fieldChange = null;
         try {
             kCla = Class.forName(className);
+            fieldChange = kCla.newInstance();
             List<Field> fields = getFields(kCla);
-            injectionFields(fields);
+            injectionFields(fields, fieldChange);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return kCla.newInstance();
+        return fieldChange;
     }
 
     private List<Field> getFields(Class kCla) {
         return Stream.of(kCla.getDeclaredFields()).filter(field -> field.getAnnotation(Autowired.class) != null).collect(Collectors.toList());
     }
 
-    private void injectionFields(List<Field> fields) {
+    private void injectionFields(List<Field> fields, Object fieldChangeObj) {
         fields.stream().forEach(field -> {
             String fileName = field.getName();
             String fieldClassName = properties.getProperty(fileName);
             try {
                 Class<?> aClass = Class.forName(fieldClassName);
-                injectionFields(getFields(aClass));
+                Object o = aClass.newInstance();
+                injectionFields(getFields(aClass), o);
                 field.setAccessible(true);
-                field.set(fileName,aClass.newInstance());
+                field.set(fieldChangeObj, o);
             } catch (Exception e) {
                 e.printStackTrace();
             }
