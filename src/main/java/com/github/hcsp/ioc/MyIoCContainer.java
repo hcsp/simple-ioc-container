@@ -33,9 +33,9 @@ public class MyIoCContainer {
             Stream.of(beanInstance.getClass().getDeclaredFields()).filter((Field field)->{
                 return field.getAnnotation(Autowired.class) !=null;
             }).forEach(field -> {
-                field.setAccessible(true);//有的字段可能是私有的，所以设置访问权限
+                field.setAccessible(true); //有的字段可能是私有的，所以设置访问权限
                 try {
-                    field.set(beanInstance, beans.get(field.getName()));//针对包含特殊注解的字段，挂在对象
+                    field.set(beanInstance, beans.get(field.getName())); //针对包含特殊注解的字段，挂在对象
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
