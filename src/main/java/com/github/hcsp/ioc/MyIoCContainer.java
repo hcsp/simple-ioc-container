@@ -28,7 +28,7 @@ public class MyIoCContainer {
     }
 
     private void initByAnnotation(){
-        beans.forEach((String beanName, Object beanInstance )->{
+        beans.forEach((beanName, beanInstance)->{
             Stream.of(beanInstance.getClass().getDeclaredFields())
                 .filter(field->field.getAnnotation(Autowired.class) !=null)
                 .forEach(field -> {
