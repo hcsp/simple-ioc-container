@@ -3,7 +3,6 @@ package com.github.hcsp.ioc;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 public class MyIoCContainer {
-    private static Map<String, Object> beans = new HashMap<>();
+    private Map<String, Object> beans = new HashMap<>();
     // 实现一个简单的IoC容器，使得：
     // 1. 从beans.properties里加载bean定义
     // 2. 自动扫描bean中的@Autowired注解并完成依赖注入
@@ -30,14 +29,12 @@ public class MyIoCContainer {
 
     private void initByAnnotation(){
         beans.forEach((String beanName, Object beanInstance )->{
-            Stream.of(beanInstance.getClass().getDeclaredFields()).filter((Field field)->{
-                return field.getAnnotation(Autowired.class) !=null;
-            }).forEach(field -> {
+            Stream.of(beanInstance.getClass().getDeclaredFields()).filter(field->field.getAnnotation(Autowired.class) !=null).forEach(field -> {
                 field.setAccessible(true); //有的字段可能是私有的，所以设置访问权限
                 try {
                     field.set(beanInstance, beans.get(field.getName())); //针对包含特殊注解的字段，挂在对象
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             });
         });
