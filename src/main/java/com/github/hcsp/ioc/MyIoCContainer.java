@@ -29,14 +29,16 @@ public class MyIoCContainer {
 
     private void initByAnnotation(){
         beans.forEach((String beanName, Object beanInstance )->{
-            Stream.of(beanInstance.getClass().getDeclaredFields()).filter(field->field.getAnnotation(Autowired.class) !=null).forEach(field -> {
-                field.setAccessible(true); //有的字段可能是私有的，所以设置访问权限
-                try {
-                    field.set(beanInstance, beans.get(field.getName())); //针对包含特殊注解的字段，挂在对象
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            Stream.of(beanInstance.getClass().getDeclaredFields())
+                .filter(field->field.getAnnotation(Autowired.class) !=null)
+                .forEach(field -> {
+                    field.setAccessible(true); //有的字段可能是私有的，所以设置访问权限
+                    try {
+                        field.set(beanInstance, beans.get(field.getName())); //针对包含特殊注解的字段，挂在对象
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         });
     }
 
