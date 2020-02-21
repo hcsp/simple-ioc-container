@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyIoCContainer {
-
     private Map<String, Object> beans = new HashMap<>();
 
     // 实现一个简单的IoC容器，使得：
@@ -47,6 +46,7 @@ public class MyIoCContainer {
             }
         });
         beans.forEach((beanName, beanInstance) -> dependencyInject(beanInstance, beans));
+
     }
 
     private void dependencyInject(Object beanInstance, Map<String, Object> beans) {
