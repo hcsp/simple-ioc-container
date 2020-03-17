@@ -23,7 +23,7 @@ public class MyIoCContainer {
         System.out.println();
     }
 
-    Map<String, Object> beans = new HashMap<>();
+    private final Map<String, Object> beans = new HashMap<>();
 
     // 启动该容器
     public void start() {
