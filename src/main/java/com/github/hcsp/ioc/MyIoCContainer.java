@@ -20,10 +20,9 @@ public class MyIoCContainer {
         container.start();
         OrderService orderService = (OrderService) container.getBean("orderService");
         orderService.createOrder();
-        System.out.println();
     }
 
-    private final Map<String, Object> beans = new HashMap<>();
+    private Map<String, Object> beans = new HashMap<>();
 
     // 启动该容器
     public void start() {
@@ -46,11 +45,10 @@ public class MyIoCContainer {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         });
 
         beans.forEach((beanName, beanInstance) -> {
-            injectDependency(beanName, beanInstance, beans);
+            this.injectDependency(beanName, beanInstance, beans);
         });
     }
 
