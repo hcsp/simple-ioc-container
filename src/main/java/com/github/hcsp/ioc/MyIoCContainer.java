@@ -23,9 +23,8 @@ public class MyIoCContainer {
      * 依赖注入
      *
      * @param beanInstance bean 的 实例
-     * @param beans        存放所有 bean 的容器
      */
-    private static void dependencyInject(Object beanInstance, Map<String, Object> beans) {
+    private void dependencyInject(Object beanInstance) {
         // 拿到带有 @AutoWired 注解的 fields
         List<Field> fieldsToBeAutoWired = Stream.of(beanInstance.getClass().getDeclaredFields())
                 .filter(field -> field.getAnnotation(Autowired.class) != null)
@@ -71,7 +70,7 @@ public class MyIoCContainer {
         });
 
         // 使用反射，处理依赖关系，注入依赖
-        beans.forEach((beanName, beanInstance) -> dependencyInject(beanInstance, beans));
+        beans.forEach((beanName, beanInstance) -> dependencyInject(beanInstance));
     }
 
     /**
