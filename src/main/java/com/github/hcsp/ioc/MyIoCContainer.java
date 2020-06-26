@@ -3,6 +3,7 @@ package com.github.hcsp.ioc;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.Properties;
 
 public class MyIoCContainer {
@@ -17,10 +18,22 @@ public class MyIoCContainer {
         orderService.createOrder();
     }
 
+    private Map<String, Object> beans;
     /*
      * 启动该容器
      */
     public void start() {
+        Properties properties = new Properties();
+        FileInputStream propertiesInputStream;
+        try {
+            propertiesInputStream = new FileInputStream("./src/main/resources/beans.properties");
+            properties.load(propertiesInputStream);
+            properties.forEach((k,v)->beans.add(k,Class.forName(p).getDeclaredConstructor().newInstance()));
+            propertiesInputStream.close();
+        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -31,7 +44,7 @@ public class MyIoCContainer {
         Object result = null;
         FileInputStream properties;
         try {
-            properties = new FileInputStream("C:\\Users\\sunp\\git\\simple-ioc-container\\src\\main\\resources\\beans.properties");
+            properties = new FileInputStream("./src/main/resources/beans.properties");
             beans.load(properties);
             String clazzString = beans.getProperty(beanName);
             result = Class.forName(clazzString).getDeclaredConstructor().newInstance();
