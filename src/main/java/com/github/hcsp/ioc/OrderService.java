@@ -7,8 +7,6 @@ public class OrderService {
     @Autowired private UserService userService;
 
     public void createOrder() {
-        orderDao = new OrderDao();
-        userService = new UserService();
         orderDao.createOrder(userService.getCurrentLoginUser());
     }
 }
