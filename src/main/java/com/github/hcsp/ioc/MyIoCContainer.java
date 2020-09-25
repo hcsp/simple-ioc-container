@@ -35,6 +35,8 @@ public class MyIoCContainer {
         // Init bean pool
         if (!beanDef.isEmpty()) {
             beanPool = new HashMap<>();
+
+            // Add instances to bean pool
             beanDef.forEach((beanName, beanId) -> {
                 try {
                     Object instance = Class.forName((String) beanId).getConstructor().newInstance();
@@ -45,7 +47,7 @@ public class MyIoCContainer {
             });
         }
 
-        // Dependency inject
+        // Dependency inject to each bean
         dependenciesInject(beanPool);
     }
 
