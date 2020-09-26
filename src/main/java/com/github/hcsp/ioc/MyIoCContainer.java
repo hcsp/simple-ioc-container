@@ -43,9 +43,13 @@ public class MyIoCContainer {
     }
 
     // 启动该容器
-    public void start() throws IOException {
+    public void start() {
         Properties properties = new Properties();
-        properties.load(MyIoCContainer.class.getResourceAsStream("/beans.properties"));
+        try {
+            properties.load(MyIoCContainer.class.getResourceAsStream("/beans.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         properties.forEach((beanName, beanClass) -> {
             try {
