@@ -32,6 +32,7 @@ public class MyIoCContainer {
             properties.load(MyIoCContainer.class.getResourceAsStream("/beans.properties"));
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
         properties.forEach((beanName, beanClass) -> {
             try {
