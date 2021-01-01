@@ -50,10 +50,10 @@ public class MyIoCContainer {
     // 从容器中获取一个bean
     public Object getBean(String spBeanName) {
         beans.forEach((beanName, beanInstance) -> {
-            List<Field> fieldWithoutWired = Stream.of(beanInstance.getClass().getDeclaredFields())
+            List<Field> fieldToBeWired = Stream.of(beanInstance.getClass().getDeclaredFields())
                     .filter(field -> field.getAnnotation(Autowired.class) != null)
                     .collect(Collectors.toList());
-            fieldWithoutWired.forEach(field -> {
+            fieldToBeWired.forEach(field -> {
                 String filedName = field.getName();
                 Object dependencyBeanInstance = beans.get(filedName);
                 field.setAccessible(true);
