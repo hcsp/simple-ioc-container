@@ -11,10 +11,12 @@ import java.util.stream.Stream;
 
 public class MyIoCContainer {
     private final Map<String, Object> beans = new HashMap<>();
+
     // 实现一个简单的IoC容器，使得：
     // 1. 从beans.properties里加载bean定义
     // 2. 自动扫描bean中的@Autowired注解并完成依赖注入
-    public static void main(String[] args) {
+
+    public static void main(String[] args)  {
         MyIoCContainer container = new MyIoCContainer();
         container.start();
         OrderService orderService = null;
@@ -65,7 +67,7 @@ public class MyIoCContainer {
             Field[] declaredFields = bean.getClass().getDeclaredFields();
             Stream.of(declaredFields)
                     .filter(filed -> filed.getAnnotation(Autowired.class) != null)
-                    .forEach((filed) -> {
+                    .forEach(filed -> {
                         filed.setAccessible(true);
                         try {
                             filed.set(bean, beans.get(filed.getName()));
