@@ -4,12 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyIoCContainer {
@@ -47,46 +44,35 @@ public class MyIoCContainer {
         return beans.get(beanName);
     }
 
-    public Object serialize(String beanName) {
-        Object beanObject = null;
+    public Object serialize(String bean) {
+        Object instance = null;
         try {
-            Class kclass = Class.forName(beanName);
-            beanObject = kclass.getConstructor().newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            Class<?> clazz = Class.forName(bean);
+            instance = clazz.newInstance();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
-        return beanObject;
+        if (instance != null) {
+            return instance;
+        } else {
+            throw new RuntimeException(bean + "没有正确引用");
+        }
     }
 
     private void dependencyInjection() {
         //装配依赖
-        beans.forEach((beanInitKey, beanInitObject) -> {
-            //扫描托管的类 getDeclaredFields方法 获取所有修饰符的成员属性 并且获取从中带有Autowired注解的属性
-            List<Field> fields = Stream.of(beanInitObject.getClass().getDeclaredFields())
-                    .filter(field -> field.getAnnotation(Autowired.class) != null)
-                    .collect(Collectors.toList());
-            //要注入的类
-            fields.forEach(field -> {
-                //获取需要注入的依赖名
-                String fieldsName = field.getName();
-                //获取要注入的依赖
-                Object depend = beans.get(fieldsName);
-                //塞回实例化好的依赖 注入
-                try {
-                    field.setAccessible(true);
-                    field.set(beanInitObject, depend);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        beans.forEach((beansName, bean) -> {
+            Field[] declaredFields = bean.getClass().getDeclaredFields();
+            Stream.of(declaredFields)
+                    .filter(filed -> filed.getAnnotation(Autowired.class) != null)
+                    .forEach((filed) -> {
+                        filed.setAccessible(true);
+                        try {
+                            filed.set(bean, beans.get(filed.getName()));
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    });
         });
 
     }
