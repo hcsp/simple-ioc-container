@@ -73,24 +73,4 @@ public class MyIoCContainer {
         }
 
     }
-
-    //
-    // // 构造器注入
-    // public void constructorDependencyInject(String beanName, String beanClass) throws ClassNotFoundException {
-    //     Class klass = Class.forName(beanClass);
-    //     List<Constructor> constructorsToBeAutoWired = Stream.of(klass.getDeclaredConstructors())
-    //             .filter(constructor -> constructor.getAnnotation(Autowired.class) != null)
-    //             .collect(Collectors.toList());
-    //
-    //     for (Constructor constructor : constructorsToBeAutoWired) {
-    //         Stream.of(constructor.getParameterTypes())
-    //                 .filter();
-    //     }
-    //
-    //     constructorsToBeAutoWired.stream()
-    //             .flatMap(constructor -> Stream.of(constructor.getParameterTypes()))
-    //             .map(klass -> beans.get(klass.get)
-    //
-    //
-    // }
 }
