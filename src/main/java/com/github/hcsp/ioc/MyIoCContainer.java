@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 public class MyIoCContainer {
     private final Properties properties = new Properties();
-    private final Map<String, Object> dependencyMap = new HashMap<>();
+    private final Map<String, Object> beanMap = new HashMap<>();
 
     // 实现一个简单的IoC容器，使得：
     // 1. 从beans.properties里加载bean定义
@@ -33,26 +33,42 @@ public class MyIoCContainer {
             properties.forEach((beanName, beanClass) -> {
                 try {
                     Object beanInstance = Class.forName((String) beanClass).getConstructor().newInstance();
-                    dependencyMap.put((String) beanName, beanInstance);
+                    beanMap.put((String) beanName, beanInstance);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             });
+
+            beanMap.forEach((beanName, beanInstance) -> dependencyInject(beanInstance));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void dependencyInject(Object beanInstance) {
+        Stream.of(beanInstance.getClass().getDeclaredFields())
+                .filter(field -> field.getAnnotation(Autowired.class) != null)
+                .forEach(field -> {
+                    try {
+                        String fieldType = field.getGenericType().getTypeName();
+                        field.setAccessible(true);
+                        field.set(beanInstance, beanMap.get(fieldType));
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
     // 从容器中获取一个bean
     public Object getBean(String beanName) {
         try {
-            if (dependencyMap.get(beanName) != null) {
-                return dependencyMap.get(beanName);
+            if (beanMap.get(beanName) != null) {
+                return beanMap.get(beanName);
             }
             Class<?> aClass = Class.forName(properties.getProperty(beanName));
             Object beanObject = aClass.getConstructor().newInstance();
             wireDependencies(aClass, beanObject);
-            dependencyMap.put(beanName, beanObject);
+            beanMap.put(beanName, beanObject);
             return beanObject;
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -65,13 +81,13 @@ public class MyIoCContainer {
                 .forEach(field -> {
                     try {
                         String typeName = field.getGenericType().getTypeName();
-                        Object instance = dependencyMap.get(typeName);
+                        Object instance = beanMap.get(typeName);
                         if (instance == null) {
                             Class<?> fieldClass = Class.forName(typeName);
                             instance = fieldClass.getConstructor().newInstance();
                             wireDependencies(fieldClass, instance);
                         }
-                        dependencyMap.put(typeName, instance);
+                        beanMap.put(typeName, instance);
                         field.setAccessible(true);
                         field.set(beanObject, instance);
                     } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
