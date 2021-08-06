@@ -30,6 +30,14 @@ public class MyIoCContainer {
             String beanFileName = "beans.properties";
             InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(beanFileName);
             properties.load(resourceAsStream);
+            properties.forEach((beanName, beanClass) -> {
+                try {
+                    Object beanInstance = Class.forName((String) beanClass).getConstructor().newInstance();
+                    dependencyMap.put((String) beanName, beanInstance);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
