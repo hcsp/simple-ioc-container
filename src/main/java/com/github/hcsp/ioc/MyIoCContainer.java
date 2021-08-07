@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyIoCContainer {
@@ -33,13 +36,13 @@ public class MyIoCContainer {
             properties.forEach((beanName, beanClass) -> {
                 try {
                     Object beanInstance = Class.forName((String) beanClass).getConstructor().newInstance();
-                    beanMap.put((String) beanName, beanInstance);
+                    beanMap.put((String) beanClass, beanInstance);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             });
 
-            beanMap.forEach((beanName, beanInstance) -> dependencyInject(beanInstance));
+            beanMap.forEach((beanClass, beanInstance) -> dependencyInject(beanInstance));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -61,38 +64,12 @@ public class MyIoCContainer {
 
     // 从容器中获取一个bean
     public Object getBean(String beanName) {
-        try {
-            if (beanMap.get(beanName) != null) {
-                return beanMap.get(beanName);
-            }
-            Class<?> aClass = Class.forName(properties.getProperty(beanName));
-            Object beanObject = aClass.getConstructor().newInstance();
-            wireDependencies(aClass, beanObject);
-            beanMap.put(beanName, beanObject);
-            return beanObject;
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        List<String> beanKeyList = beanMap.keySet().stream()
+                .filter(beanClass -> beanClass.endsWith(beanName.substring(0, 1).toUpperCase(Locale.ROOT).concat(beanName.substring(1))))
+                .collect(Collectors.toList());
+        if (beanKeyList.size() > 0) {
+            return beanMap.get(beanKeyList.get(0));
         }
-    }
-
-    private void wireDependencies(Class<?> aClass, Object beanObject) {
-        Stream.of(aClass.getDeclaredFields())
-                .filter(field -> field.getAnnotation(Autowired.class) != null)
-                .forEach(field -> {
-                    try {
-                        String typeName = field.getGenericType().getTypeName();
-                        Object instance = beanMap.get(typeName);
-                        if (instance == null) {
-                            Class<?> fieldClass = Class.forName(typeName);
-                            instance = fieldClass.getConstructor().newInstance();
-                            wireDependencies(fieldClass, instance);
-                        }
-                        beanMap.put(typeName, instance);
-                        field.setAccessible(true);
-                        field.set(beanObject, instance);
-                    } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+        return null;
     }
 }
