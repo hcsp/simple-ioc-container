@@ -25,8 +25,6 @@ public class MyIoCContainer {
     }
 
 
-
-
     // 启动该容器
     public void start() {
         Properties properties = new Properties();
@@ -46,9 +44,10 @@ public class MyIoCContainer {
         });
 
         beans.forEach((beanName, beanInstance) -> dependencyInject(beanName, beanInstance, beans));
-        OrderService orderService = (OrderService)beans.get("orderService");
-        OrderDao orderDao = (OrderDao)beans.get("orderDao");
+        OrderService orderService = (OrderService) beans.get("orderService");
+        OrderDao orderDao = (OrderDao) beans.get("orderDao");
     }
+
     public static void dependencyInject(String beanName, Object beanInstance, Map<String, Object> beans) {
         List<Field> fieldsToBeAutowired = Stream.of(beanInstance.getClass().getDeclaredFields())
                 .filter(field -> field.getAnnotation(Autowired.class) != null)
